@@ -4,21 +4,39 @@ import { useState, useEffect } from 'react';
 import { Todo, Priority, Category, FilterStatus } from '../types/todo';
 
 const CATEGORIES: Category[] = ['仕事', '副業', 'プライベート', '学習', 'その他'];
+
 const CATEGORY_ICONS: Record<Category, string> = {
   仕事: '💼', 副業: '💡', プライベート: '🏠', 学習: '📚', その他: '📌',
 };
+
+const CATEGORY_COLORS: Record<Category, string> = {
+  仕事:       'bg-blue-100 text-blue-700',
+  副業:       'bg-yellow-100 text-yellow-700',
+  プライベート: 'bg-pink-100 text-pink-700',
+  学習:       'bg-green-100 text-green-700',
+  その他:     'bg-purple-100 text-purple-700',
+};
+
 const PRIORITY_LABELS: Record<Priority, string> = {
   high: '高', medium: '中', low: '低',
 };
+
 const PRIORITY_COLORS: Record<Priority, string> = {
-  high: 'bg-red-100 text-red-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-green-100 text-green-700',
+  high:   'bg-red-100 text-red-600',
+  medium: 'bg-orange-100 text-orange-600',
+  low:    'bg-teal-100 text-teal-600',
 };
+
 const PRIORITY_BORDER: Record<Priority, string> = {
-  high: 'border-l-red-400',
-  medium: 'border-l-yellow-400',
-  low: 'border-l-green-400',
+  high:   'border-l-red-400',
+  medium: 'border-l-orange-400',
+  low:    'border-l-teal-400',
+};
+
+const PRIORITY_DOT: Record<Priority, string> = {
+  high:   'bg-red-400',
+  medium: 'bg-orange-400',
+  low:    'bg-teal-400',
 };
 
 function isOverdue(todo: Todo): boolean {
@@ -78,46 +96,52 @@ export default function TodoApp() {
   });
 
   const active = filtered.filter(t => !t.done);
-  const done = filtered.filter(t => t.done);
+  const done   = filtered.filter(t => t.done);
 
-  const stats = {
-    total: todos.length,
-    active: todos.filter(t => !t.done).length,
-    done: todos.filter(t => t.done).length,
-    overdue: todos.filter(t => isOverdue(t)).length,
-  };
+  const stats = [
+    { label: '合計',    value: todos.length,                          emoji: '📋', color: 'from-violet-400 to-purple-500' },
+    { label: '未完了',  value: todos.filter(t => !t.done).length,     emoji: '🔥', color: 'from-orange-400 to-pink-500'   },
+    { label: '完了',    value: todos.filter(t => t.done).length,      emoji: '✅', color: 'from-green-400 to-teal-500'    },
+    { label: '期限切れ', value: todos.filter(t => isOverdue(t)).length, emoji: '⚠️', color: 'from-red-400 to-rose-500'     },
+  ];
 
-  const filterButtons: { key: FilterStatus; label: string }[] = [
-    { key: 'all', label: 'すべて' },
-    { key: 'active', label: '未完了' },
-    { key: 'done', label: '完了' },
-    { key: 'overdue', label: '期限切れ' },
+  const filterButtons: { key: FilterStatus; label: string; emoji: string }[] = [
+    { key: 'all',     label: 'すべて',   emoji: '🗂️' },
+    { key: 'active',  label: '未完了',   emoji: '🔥' },
+    { key: 'done',    label: '完了',     emoji: '✅' },
+    { key: 'overdue', label: '期限切れ', emoji: '⚠️' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4" style={{ background: 'linear-gradient(135deg, #fdf6ff 0%, #fef9ee 50%, #f0fffe 100%)' }}>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-extrabold text-center text-gray-800 mb-8 tracking-tight">
-          📝 Todoアプリ
-        </h1>
+
+        {/* ヘッダー */}
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-2">🌈</div>
+          <h1 className="text-4xl font-extrabold tracking-tight" style={{ background: 'linear-gradient(90deg, #f472b6, #a78bfa, #60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            My Todo App
+          </h1>
+          <p className="text-gray-500 text-sm mt-1 font-medium">タスクを管理してハッピーに！🎉</p>
+        </div>
 
         {/* 追加フォーム */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-3xl shadow-lg p-6 mb-6 border border-pink-100">
           <div className="flex gap-2 mb-3">
             <input
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addTodo()}
-              placeholder="タスクを入力..."
-              className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-500 outline-none focus:border-indigo-400 transition-colors"
+              placeholder="✏️ 新しいタスクを入力..."
+              className="flex-1 border-2 border-purple-200 rounded-2xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-purple-400 transition-colors font-medium"
             />
           </div>
-          <div className="flex gap-2 mb-3 flex-wrap">
+          <div className="flex gap-2 mb-4 flex-wrap">
             <select
               value={category}
               onChange={e => setCategory(e.target.value as Category)}
-              className="border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-indigo-400 bg-white cursor-pointer"
+              className="border-2 border-blue-200 rounded-2xl px-3 py-2.5 text-sm text-gray-800 font-medium outline-none focus:border-blue-400 bg-white cursor-pointer"
             >
               {CATEGORIES.map(c => (
                 <option key={c} value={c}>{CATEGORY_ICONS[c]} {c}</option>
@@ -126,63 +150,61 @@ export default function TodoApp() {
             <select
               value={priority}
               onChange={e => setPriority(e.target.value as Priority)}
-              className="border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-indigo-400 bg-white cursor-pointer"
+              className="border-2 border-orange-200 rounded-2xl px-3 py-2.5 text-sm text-gray-800 font-medium outline-none focus:border-orange-400 bg-white cursor-pointer"
             >
               <option value="high">🔴 優先度：高</option>
-              <option value="medium">🟡 優先度：中</option>
+              <option value="medium">🟠 優先度：中</option>
               <option value="low">🟢 優先度：低</option>
             </select>
             <input
               type="date"
               value={due}
               onChange={e => setDue(e.target.value)}
-              className="border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-indigo-400 bg-white cursor-pointer"
+              className="border-2 border-teal-200 rounded-2xl px-3 py-2.5 text-sm text-gray-800 font-medium outline-none focus:border-teal-400 bg-white cursor-pointer"
             />
           </div>
           <button
             onClick={addTodo}
-            className="w-full bg-indigo-500 hover:bg-indigo-600 active:scale-[0.98] text-white font-bold py-2.5 rounded-xl text-sm transition-all"
+            className="w-full text-white font-bold py-3 rounded-2xl text-sm transition-all active:scale-[0.98] shadow-md hover:shadow-lg"
+            style={{ background: 'linear-gradient(90deg, #f472b6, #a78bfa, #60a5fa)' }}
           >
-            ＋ タスクを追加
+            ＋ タスクを追加する
           </button>
         </div>
 
-        {/* 統計 */}
+        {/* 統計カード */}
         <div className="grid grid-cols-4 gap-3 mb-6">
-          {[
-            { label: '合計', value: stats.total },
-            { label: '未完了', value: stats.active },
-            { label: '完了', value: stats.done },
-            { label: '期限切れ', value: stats.overdue },
-          ].map(s => (
-            <div key={s.label} className="bg-white rounded-xl shadow-sm p-4 text-center">
-              <div className="text-2xl font-extrabold text-indigo-500">{s.value}</div>
-              <div className="text-xs text-gray-600 mt-1 font-medium">{s.label}</div>
+          {stats.map(s => (
+            <div key={s.label} className={`rounded-2xl p-4 text-center text-white bg-gradient-to-br ${s.color} shadow-md`}>
+              <div className="text-xl mb-1">{s.emoji}</div>
+              <div className="text-2xl font-extrabold">{s.value}</div>
+              <div className="text-xs font-semibold opacity-90 mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* フィルター */}
-        <div className="flex gap-2 flex-wrap items-center mb-4">
+        <div className="flex gap-2 flex-wrap items-center mb-5">
           {filterButtons.map(b => (
             <button
               key={b.key}
               onClick={() => setFilter(b.key)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+              className={`px-4 py-2 rounded-2xl text-sm font-bold border-2 transition-all ${
                 filter === b.key
-                  ? 'bg-indigo-500 text-white border-indigo-500'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400'
+                  ? 'text-white border-transparent shadow-md'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-purple-300'
               }`}
+              style={filter === b.key ? { background: 'linear-gradient(90deg, #f472b6, #a78bfa)' } : {}}
             >
-              {b.label}
+              {b.emoji} {b.label}
             </button>
           ))}
           <select
             value={catFilter}
             onChange={e => setCatFilter(e.target.value as Category | 'all')}
-            className="ml-auto border border-gray-300 rounded-full px-3 py-1.5 text-sm text-gray-800 bg-white outline-none cursor-pointer"
+            className="ml-auto border-2 border-purple-200 rounded-2xl px-3 py-2 text-sm text-gray-800 font-medium bg-white outline-none cursor-pointer"
           >
-            <option value="all">カテゴリ: すべて</option>
+            <option value="all">🗂️ カテゴリ: すべて</option>
             {CATEGORIES.map(c => (
               <option key={c} value={c}>{CATEGORY_ICONS[c]} {c}</option>
             ))}
@@ -192,16 +214,19 @@ export default function TodoApp() {
         {/* タスクリスト */}
         <div className="flex flex-col gap-3">
           {filtered.length === 0 && (
-            <div className="text-center text-gray-500 py-16">
-              <div className="text-5xl mb-3">✅</div>
-              <div>タスクがありません</div>
+            <div className="text-center text-gray-400 py-16 bg-white rounded-3xl border-2 border-dashed border-purple-200">
+              <div className="text-5xl mb-3">🎊</div>
+              <div className="font-bold text-gray-500">タスクがありません！</div>
+              <div className="text-sm text-gray-400 mt-1">新しいタスクを追加しよう</div>
             </div>
           )}
 
           {active.length > 0 && (
             <>
               {done.length > 0 && (
-                <div className="text-xs font-bold text-gray-600 uppercase tracking-widest mt-2">未完了</div>
+                <div className="text-xs font-extrabold text-purple-400 uppercase tracking-widest mt-2 flex items-center gap-2">
+                  <span>🔥 未完了</span>
+                </div>
               )}
               {active.map(todo => <TaskItem key={todo.id} todo={todo} onToggle={toggleDone} onDelete={deleteTodo} />)}
             </>
@@ -209,7 +234,9 @@ export default function TodoApp() {
 
           {done.length > 0 && (
             <>
-              <div className="text-xs font-bold text-gray-600 uppercase tracking-widest mt-2">完了</div>
+              <div className="text-xs font-extrabold text-teal-400 uppercase tracking-widest mt-2 flex items-center gap-2">
+                <span>✅ 完了</span>
+              </div>
               {done.map(todo => <TaskItem key={todo.id} todo={todo} onToggle={toggleDone} onDelete={deleteTodo} />)}
             </>
           )}
@@ -227,34 +254,36 @@ function TaskItem({ todo, onToggle, onDelete }: {
   const overdue = isOverdue(todo);
 
   return (
-    <div className={`bg-white rounded-2xl shadow-sm p-4 flex items-start gap-4 border-l-4 ${PRIORITY_BORDER[todo.priority]} ${todo.done ? 'opacity-50' : ''} transition-opacity`}>
+    <div className={`bg-white rounded-2xl shadow-sm p-4 flex items-start gap-4 border-l-4 ${PRIORITY_BORDER[todo.priority]} ${todo.done ? 'opacity-50' : ''} transition-all hover:shadow-md border border-gray-100`}>
       {/* チェックボタン */}
       <button
         onClick={() => onToggle(todo.id)}
-        className={`w-6 h-6 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+        className={`w-7 h-7 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
           todo.done
-            ? 'bg-indigo-500 border-indigo-500 text-white'
-            : 'border-gray-300 hover:border-indigo-400'
+            ? 'border-transparent text-white'
+            : 'border-gray-300 hover:border-purple-400 bg-white'
         }`}
+        style={todo.done ? { background: 'linear-gradient(135deg, #f472b6, #a78bfa)' } : {}}
       >
-        {todo.done && <span className="text-xs font-bold">✓</span>}
+        {todo.done && <span className="text-sm font-bold">✓</span>}
       </button>
 
       {/* 本文 */}
       <div className="flex-1 min-w-0">
-        <div className={`text-sm font-semibold mb-1.5 break-words ${todo.done ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+        <div className={`text-sm font-bold mb-2 break-words ${todo.done ? 'line-through text-gray-400' : 'text-gray-800'}`}>
           {todo.title}
         </div>
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
+        <div className="flex flex-wrap gap-1.5 items-center">
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${CATEGORY_COLORS[todo.category]}`}>
             {CATEGORY_ICONS[todo.category]} {todo.category}
           </span>
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${PRIORITY_COLORS[todo.priority]}`}>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${PRIORITY_COLORS[todo.priority]}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${PRIORITY_DOT[todo.priority]}`}></span>
             {PRIORITY_LABELS[todo.priority]}優先度
           </span>
           {todo.due && (
-            <span className={`text-xs flex items-center gap-1 ${overdue ? 'text-red-500 font-semibold' : 'text-gray-600'}`}>
-              📅 {formatDate(todo.due)}{overdue && ' (期限切れ)'}
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${overdue ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+              📅 {formatDate(todo.due)}{overdue && ' 期限切れ'}
             </span>
           )}
         </div>
@@ -263,7 +292,7 @@ function TaskItem({ todo, onToggle, onDelete }: {
       {/* 削除ボタン */}
       <button
         onClick={() => onDelete(todo.id)}
-        className="text-gray-400 hover:text-red-500 transition-colors text-lg leading-none flex-shrink-0 pt-0.5"
+        className="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none flex-shrink-0 pt-0.5 hover:scale-110"
       >
         ✕
       </button>
